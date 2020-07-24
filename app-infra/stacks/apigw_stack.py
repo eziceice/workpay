@@ -15,7 +15,7 @@ class APIGatewayStack(core.Stack):
                  **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        self.rest_api = apigw.RestApi(self, id="API", rest_api_name=f"{props.owner}-{props.env}-api",
+        self.rest_api = apigw.RestApi(self, id="API", rest_api_name=f"{props.org}-{props.env}-api",
                                       endpoint_types=[apigw.EndpointType.REGIONAL], cloud_watch_role=True,
                                       deploy_options=apigw.StageOptions(logging_level=apigw.MethodLoggingLevel.INFO,
                                                                         metrics_enabled=True,

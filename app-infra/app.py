@@ -10,8 +10,8 @@ import stacks.properties as props
 
 app = core.App()
 
-lambda_stack = LambdaStack(app, f"{props.owner}-{props.env}-lambda-stack")
-APIGatewayStack(app, f"{props.owner}-{props.env}-apigw-stack", functions=lambda_stack.functions)
-DynamoDBStack(app, f"{props.owner}-{props.env}-dynamodb-stack")
+lambda_stack = LambdaStack(app, f"{props.org}-{props.env}-lambda-stack")
+APIGatewayStack(app, f"{props.org}-{props.env}-apigw-stack", functions=lambda_stack.functions)
+DynamoDBStack(app, f"{props.org}-{props.env}-dynamodb-stack")
 
 app.synth()

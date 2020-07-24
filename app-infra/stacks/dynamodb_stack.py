@@ -15,7 +15,7 @@ class DynamoDBStack(core.Stack):
     def create_user_table(self):
         # create dynamo table
         request_table = dynamodb.Table(
-            self, id="UserTable", table_name=f"{props.owner}-{props.env}-user-table",
+            self, id="UserTable", table_name=f"{props.org}-{props.env}-user-table",
             partition_key=dynamodb.Attribute(
                 name="id",
                 type=dynamodb.AttributeType.STRING

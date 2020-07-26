@@ -3,3 +3,6 @@ env:
 
 org:
   workpay
+
+assembly-payment:
+  url: https://test.api.promisepay.com

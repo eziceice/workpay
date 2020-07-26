@@ -36,19 +36,20 @@ def mock_users_data(client, table_name):
     for x in range(5):
         client.put_item(TableName=table_name, Item={
             'id': {'S': str(uuid.uuid4())},
-            'name': {'S': 'MJ'},
+            'first_name': {'S': 'Michael'},
+            'last_name': {'S': 'Jordan'},
             'email': {'S': 'MJ@125.com'},
-            'phone': {'S': f'0444004{x}'}
+            'mobile': {'S': f'0444004{x}'},
+            'country': {'S': 'AUS'},
+            'type': {'S': 'Seller'}
         })
 
 
 class TestUserHandlerFunction(TestCase):
 
     def setUp(self) -> None:
-        properties = utils.get_properties()
-        org = properties['org']
-        env = properties['env']
-        self.table_name = f'{org}-{env}-user-table'
+        properties = utils.AppProperties()
+        self.table_name = f'{properties.org}-{properties.env}-user-table'
 
     @mock_dynamodb2
     def test_create_user_succeed(self):

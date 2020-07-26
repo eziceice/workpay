@@ -40,6 +40,6 @@
     "domainName": "testPrefix.testDomainName",
     "apiId": "azst5afj41"
   },
-  "body": "{\"name\": \"Yutian\", \"email\": \"liyutian886@gmail.com\", \"phone\": \"0451777888\"}",
+  "body": "{\"first_name\": \"Yutian\", \"last_name\": \"Li8\", \"email\": \"liyutian8@gmail.com\", \"mobile\": \"0451777888\", \"country\": \"AUS\", \"type\": \"seller\"}",
   "isBase64Encoded": "False"
 }

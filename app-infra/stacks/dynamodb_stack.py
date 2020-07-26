@@ -10,14 +10,14 @@ class DynamoDBStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        self.create_user_table()
+        self.create_tables()
 
-    def create_user_table(self):
+    def create_tables(self):
         # create dynamo table
-        request_table = dynamodb.Table(
-            self, id="UserTable", table_name=f"{props.org}-{props.env}-user-table",
+        dynamodb.Table(
+            self, id='UserTable', table_name=f'{props.org}-{props.env}-user-table',
             partition_key=dynamodb.Attribute(
-                name="id",
+                name='id',
                 type=dynamodb.AttributeType.STRING
             ),
             removal_policy=core.RemovalPolicy.RETAIN

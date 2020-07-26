@@ -7,8 +7,9 @@ def exception_handler_on_error(handler):
     def wrapper(event, context):
         try:
             return handler(event, context)
-        except Exception:
+        except Exception as ex:
             print('event = %r' % event)
+            print(ex)
             return {
                 'statusCode': 400,
                 'headers': {

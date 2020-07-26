@@ -7,9 +7,8 @@ from exception_handler import exception_handler_on_error
 def create_user(event, context):
     request_body = json.loads(event['body'])
     user_id = event['requestContext']['requestId']
-    user_details = build_user_details(user_id, request_body)
     user_service = UserService()
-    user_service.add_user(user_detail=user_details)
+    user_service.add_user(id=user_id, body=request_body)
     return {
         'statusCode': 201,
         'headers': {
@@ -28,13 +27,4 @@ def get_users(event, context):
             'Content-Type': 'application/json'
         },
         'body': json.dumps(users)
-    }
-
-
-def build_user_details(id, body):
-    return {
-        'id': {'S': id},
-        'name': {'S': body['name']},
-        'email': {'S': body['email']},
-        'phone': {'S': body['phone']}
     }

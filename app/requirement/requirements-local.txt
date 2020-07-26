@@ -1,0 +1,3 @@
+boto3
+moto # moto is used for test only
+pyyaml

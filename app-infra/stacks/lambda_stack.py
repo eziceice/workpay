@@ -29,7 +29,7 @@ class LambdaStack(core.Stack):
             runtime=_lambda.Runtime.PYTHON_3_8,
             code=_lambda.Code.from_bucket(bucket=s3.Bucket.from_bucket_name(self, id='LambdaResourcesBucket',
                                                                             bucket_name=f'{props.org}-{props.env}-lambda-resources'),
-                                          key='workpay-payment-api-2020-07-26_20-30-16.zip'),
+                                          key='workpay-payment-api-2020-07-26_22-10-19.zip'),
             handler='user_handler.create_user',
             role=lambda_full_access_role
         )

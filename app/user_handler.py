@@ -8,23 +8,12 @@ def create_user(event, context):
     request_body = json.loads(event['body'])
     user_id = event['requestContext']['requestId']
     user_service = UserService()
-    user_service.add_user(id=user_id, body=request_body)
+    user_service.add_user(user_id=user_id, body=request_body)
+    response = {'user_id': f'{user_id}'}
     return {
         'statusCode': 201,
         'headers': {
             'Content-Type': 'application/json'
         },
-        'body': json.dumps({'message': 'User has been created in the system'})
-    }
-
-
-def get_users(event, context):
-    user_service = UserService()
-    users = user_service.get_users()
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json'
-        },
-        'body': json.dumps(users)
+        'body': json.dumps(response)
     }

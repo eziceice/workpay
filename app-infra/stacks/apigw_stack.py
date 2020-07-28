@@ -22,6 +22,7 @@ class APIGatewayStack(core.Stack):
                                                                         tracing_enabled=True, stage_name=props.env))
         v1_resource = self.create_api_v1_resource()
         self.create_api_v1_user_resource(v1_resource, functions)
+        self.create_api_v1_company_resource(v1_resource, functions)
 
     def create_api_v1_resource(self):
         v1_resource = apigw.Resource(self, id='APIv1Resource', path_part='v1', parent=self.rest_api.root)
@@ -33,3 +34,19 @@ class APIGatewayStack(core.Stack):
         # Create User
         apigw.Method(self, id='CreateUserMethod', http_method='POST', resource=user_resource,
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_USER], proxy=True))
+
+    def create_api_v1_company_resource(self, parent_resource, functions):
+        company_resource = apigw.Resource(self, id='APIv1CompanyResource', path_part='companies', parent=parent_resource)
+
+        # Create Company
+        apigw.Method(self, id='CreateCompanyMethod', http_method='POST', resource=company_resource,
+                     integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_COMPANY], proxy=True))
+
+        # Get Companies
+        apigw.Method(self, id='GETCompaniesMethod', http_method='GET', resource=company_resource,
+                     integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_COMPANIES], proxy=True))
+
+        # Get Company from company_id
+        company_id_resource = company_resource.add_resource(path_part="{company_id}")
+        company_id_resource.add_method(http_method="GET", integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_COMPANY], proxy=True))
+

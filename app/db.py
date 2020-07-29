@@ -21,6 +21,6 @@ class DynamoDB:
             return table.scan()['Items']
         return table.scan(FilterExpression=item_filter)['Items']
 
-    def get_item(self, table_name: str, item_id: str):
+    def get_item(self, table_name: str, key: str, item_id: str):
         table = self.dynamodb.Table(table_name)
-        return table.query(KeyConditionExpression=Key('id').eq(item_id))['Items']
+        return table.query(KeyConditionExpression=Key(key).eq(item_id))['Items']

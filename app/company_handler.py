@@ -8,7 +8,7 @@ def create_company(event, context):
     request_body = json.loads(event['body'])
     company_service = CompanyService()
     company_id = company_service.add_company(body=request_body)
-    response = {'company_id': f'{company_id}'}
+    response = {'company_id': company_id}
     return {
         'statusCode': 201,
         'headers': {
@@ -27,11 +27,7 @@ def get_companies(event, context):
         'headers': {
             'Content-Type': 'application/json'
         },
-        'body': {
-            'companies': {
-                json.dumps(response)
-            }
-        }
+        'body': json.dumps(response)
     }
 
 

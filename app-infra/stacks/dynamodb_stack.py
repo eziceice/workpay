@@ -31,3 +31,12 @@ class DynamoDBStack(core.Stack):
             ),
             removal_policy=core.RemovalPolicy.RETAIN
         )
+
+        dynamodb.Table(
+            self, id='QuoteTable', table_name=f'{props.org}-{props.env}-quote-table',
+            partition_key=dynamodb.Attribute(
+                name='id',
+                type=dynamodb.AttributeType.STRING
+            ),
+            removal_policy=core.RemovalPolicy.RETAIN
+        )

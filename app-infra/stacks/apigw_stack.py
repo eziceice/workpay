@@ -23,6 +23,7 @@ class APIGatewayStack(core.Stack):
         v1_resource = self.create_api_v1_resource()
         self.create_api_v1_user_resource(v1_resource, functions)
         self.create_api_v1_company_resource(v1_resource, functions)
+        self.create_api_v1_quote_resource(v1_resource, functions)
 
     def create_api_v1_resource(self):
         v1_resource = apigw.Resource(self, id='APIv1Resource', path_part='v1', parent=self.rest_api.root)
@@ -36,7 +37,8 @@ class APIGatewayStack(core.Stack):
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_USER], proxy=True))
 
     def create_api_v1_company_resource(self, parent_resource, functions):
-        company_resource = apigw.Resource(self, id='APIv1CompanyResource', path_part='companies', parent=parent_resource)
+        company_resource = apigw.Resource(self, id='APIv1CompanyResource', path_part='companies',
+                                          parent=parent_resource)
 
         # Create Company
         apigw.Method(self, id='CreateCompanyMethod', http_method='POST', resource=company_resource,
@@ -48,5 +50,13 @@ class APIGatewayStack(core.Stack):
 
         # Get Company from company_id
         company_id_resource = company_resource.add_resource(path_part="{company_id}")
-        company_id_resource.add_method(http_method="GET", integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_COMPANY], proxy=True))
+        company_id_resource.add_method(http_method="GET",
+                                       integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_COMPANY],
+                                                                           proxy=True))
 
+    def create_api_v1_quote_resource(self, parent_resource, functions):
+        quote_resource = apigw.Resource(self, id='APIv1QuoteResource', path_part='quotes', parent=parent_resource)
+
+        # Create Quote
+        apigw.Method(self, id='CreateQuoteMethod', http_method='POST', resource=quote_resource,
+                     integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_QUOTE], proxy=True))

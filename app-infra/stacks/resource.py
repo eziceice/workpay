@@ -6,3 +6,4 @@ class LambdaFunction(Enum):
     CREATE_COMPANY = 'create-company'
     GET_COMPANY = 'get-company'
     GET_COMPANIES = 'get-companies'
+    CREATE_QUOTE = 'create-quote'

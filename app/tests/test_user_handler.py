@@ -68,7 +68,7 @@ class TestUserHandlerFunction(TestCase):
                                                'type': 'seller'})
 
     @patch.object(UserService, 'add_user')
-    def test_create_user_error(self, fake_add_user):
+    def test_create_user_failed(self, fake_add_user):
         fake_add_user.side_effect = KeyError(Mock(status=400), 'user_id is missing!')
         with open(f'{pathlib.Path(__file__).parent}/resources/create_user_input.json') as f:
             data = json.loads(f.read())

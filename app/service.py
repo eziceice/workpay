@@ -1,5 +1,4 @@
 import logging
-
 from datetime import date
 from db import DynamoDB
 from typing import (
@@ -9,7 +8,7 @@ from typing import (
 )
 from utils import AppProperties
 from requests.auth import HTTPBasicAuth
-from exception_handler import (
+from exception import (
     AssemblyPaymentError,
     ResourceNotFoundError,
     AssemblyPaymentAuthError)
@@ -66,19 +65,20 @@ class CompanyService:
         gw_company_item = self.build_payment_gw_item(body)
         db_company_item = self.build_db_item(company_id, body)
         company_id = self.payment_gw.add_company(gw_company_item, endpoint='companies')
+        db_company_item['id'] = company_id
         self.dynamodb.add_item(table_name=self.table_name, item=db_company_item)
         return company_id
 
     def get_companies(self) -> List[Dict[str, Any]]:
         result = self.dynamodb.get_items(table_name=self.table_name)
         if len(result) == 0:
-            raise ResourceNotFoundError(f"Can not found any companies in the system", 404)
+            raise ResourceNotFoundError(f'Can not found any companies in the system', 404)
         return result
 
     def get_company(self, company_id: str):
         result = self.dynamodb.get_item(table_name=self.table_name, key='id', item_id=company_id)
         if len(result) == 0:
-            raise ResourceNotFoundError(f"Can not found company with given id - {company_id} in the system", 404)
+            raise ResourceNotFoundError(f'Can not found company with given id - {company_id} in the system', 404)
         return result
 
     @classmethod
@@ -120,6 +120,12 @@ class QuoteService:
         db_quote_item = self.build_db_item(quote_id, body)
         self.dynamodb.add_item(table_name=self.table_name, item=db_quote_item)
 
+    def get_quote(self, quote_id: str):
+        result = self.dynamodb.get_item(table_name=self.table_name, key='id', item_id=quote_id)
+        if len(result) == 0:
+            raise ResourceNotFoundError(f'Can not found quote with given id - {quote_id} in the system', 404)
+        return result
+
     @classmethod
     def build_db_item(cls, quote_id, body):
         return {
@@ -147,15 +153,16 @@ class AssemblyPaymentService:
                         'content-type': 'application/json'}
 
     def add_user(self, data, endpoint):
+        # TODO: create a wrapper for handle request and response to assembly payment
         try:
             response = requests.post(f'{self.url}/{endpoint}', data=json.dumps(data), headers=self.headers,
                                      auth=HTTPBasicAuth(self.username, self.api_key))
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logging.exception(f'Failed to connect Assembly Payment')
-            raise AssemblyPaymentError('Internal server error', 504)
-        # TODO: process exception if user creation failed
+            raise AssemblyPaymentError(AssemblyPaymentError.CONNECTION_ERROR, 504)
+
         if response.status_code == 201:
-            print(response.content)
+            logging.info(f'Receiving successful response from Assembly Payment: {response.content}')
         else:
             self.handle_response_error(response.status_code, response.content)
 
@@ -163,11 +170,12 @@ class AssemblyPaymentService:
         try:
             response = requests.post(f'{self.url}/{endpoint}', data=json.dumps(data), headers=self.headers,
                                      auth=HTTPBasicAuth(self.username, self.api_key))
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logging.exception(f'Failed to connect Assembly Payment')
-            raise AssemblyPaymentError('Internal server error', 504)
-        # TODO: process exception if user creation failed
+            raise AssemblyPaymentError(AssemblyPaymentError.CONNECTION_ERROR, 504)
+
         if response.status_code == 201:
+            logging.info(f'Receiving successful response from Assembly Payment: {response.content}')
             company_id = json.loads(response.content)['companies']['id']
             return company_id
         else:
@@ -177,9 +185,9 @@ class AssemblyPaymentService:
         try:
             response = requests.post(f'{self.url}/{endpoint}', data=json.dumps(data), headers=self.headers,
                                      auth=HTTPBasicAuth(self.username, self.api_key))
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logging.exception(f'Failed to connect Assembly Payment')
-            raise AssemblyPaymentError('Internal server error', 504)
+            raise AssemblyPaymentError(AssemblyPaymentError.CONNECTION_ERROR, 504)
         # TODO: process exception if user creation failed
         if response.status_code == 201:
             quote_id = json.loads(response.content)['items']['id']
@@ -191,9 +199,9 @@ class AssemblyPaymentService:
         if status_code in (401, 403):
             logging.error(
                 f'Assembly Payment authentication error, response code: {status_code}, response content: {content}')
-            raise AssemblyPaymentAuthError('Internal server error', 500, content)
+            raise AssemblyPaymentAuthError(AssemblyPaymentError.SYSTEM_ERROR, 500, content)
 
         if status_code == 500:
             logging.error(
                 f'Assembly Payment internal server error, response code: {status_code}, response content: {content}')
-            raise AssemblyPaymentError('Internal server error', 500, content)
+            raise AssemblyPaymentError(AssemblyPaymentError.SYSTEM_ERROR, 500, content)

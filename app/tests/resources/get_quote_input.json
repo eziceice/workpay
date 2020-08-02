@@ -1,0 +1,47 @@
+{
+  "resource": "/v1/quotes/{quote_id}",
+  "path": "/v1/quotes/6521ff6f-b441-4ef9-97e9-c54c077836ea",
+  "httpMethod": "GET",
+  "headers": "None",
+  "multiValueHeaders": "None",
+  "queryStringParameters": "None",
+  "multiValueQueryStringParameters": "None",
+  "pathParameters": {
+    "company_id": "6521ff6f-b441-4ef9-97e9-c54c077836ea"
+  },
+  "stageVariables": "None",
+  "requestContext": {
+    "resourceId": "kkw3nk",
+    "resourcePath": "/v1/quotes/{quote_id}",
+    "httpMethod": "GET",
+    "extendedRequestId": "QYCS_FuASwMFauw=",
+    "requestTime": "28/Jul/2020:08:38:43 +0000",
+    "path": "/v1/quotes/{quote_id}",
+    "accountId": "082843436589",
+    "protocol": "HTTP/1.1",
+    "stage": "test-invoke-stage",
+    "domainPrefix": "testPrefix",
+    "requestTimeEpoch": 1595925523067,
+    "requestId": "6cbbd83c-a0c4-41be-a68c-0ac7d529f0ba",
+    "identity": {
+      "cognitoIdentityPoolId": "None",
+      "cognitoIdentityId": "None",
+      "apiKey": "test-invoke-api-key",
+      "principalOrgId": "None",
+      "cognitoAuthenticationType": "None",
+      "userArn": "arn:aws:iam::082843436589:user/Yutian.Li",
+      "apiKeyId": "test-invoke-api-key-id",
+      "userAgent": "aws-internal/3 aws-sdk-java/1.11.820 Linux/4.9.217-0.1.ac.205.84.332.metal1.x86_64 OpenJDK_64-Bit_Server_VM/25.252-b09 java/1.8.0_252 vendor/Oracle_Corporation",
+      "accountId": "082843436589",
+      "caller": "AIDARGSO2QYWZEUVXMSAA",
+      "sourceIp": "test-invoke-source-ip",
+      "accessKey": "ASIARGSO2QYWTAESFHHU",
+      "cognitoAuthenticationProvider": "None",
+      "user": "AIDARGSO2QYWZEUVXMSAA"
+    },
+    "domainName": "testPrefix.testDomainName",
+    "apiId": "azst5afj41"
+  },
+  "body": "None",
+  "isBase64Encoded": "False"
+}

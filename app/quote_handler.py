@@ -17,3 +17,17 @@ def create_quote(event, context):
         },
         'body': json.dumps(response)
     }
+
+
+@exception_handler_on_error
+def get_quote(event, context):
+    quote_id = event['pathParameters']['quote_id']
+    quote_service = QuoteService()
+    response = quote_service.get_quote(quote_id=quote_id)[0]
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps(response)
+    }

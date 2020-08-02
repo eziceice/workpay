@@ -2,23 +2,7 @@ import functools
 import json
 import logging
 
-
-class AssemblyPaymentError(Exception):
-    def __init__(self, message, http_status: int, content=None):
-        super().__init__(message)
-        self.http_status = http_status
-        self.content = content
-
-
-class AssemblyPaymentAuthError(AssemblyPaymentError):
-    def __init__(self, message, http_status: int, content):
-        super().__init__(message, http_status, content)
-
-
-class ResourceNotFoundError(Exception):
-    def __init__(self, message, http_status: int):
-        super().__init__(message)
-        self.http_status = http_status
+from exception import AssemblyPaymentError, ResourceNotFoundError
 
 
 def exception_handler_on_error(handler):
@@ -46,7 +30,7 @@ def exception_handler_on_error(handler):
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                'body': json.dumps({'message': err})
+                'body': json.dumps({'message': str(err)})
             }
         except ResourceNotFoundError as err:
             logging.info(f'event = {event}')
@@ -56,7 +40,7 @@ def exception_handler_on_error(handler):
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                'body': json.dumps({'message': err})
+                'body': json.dumps({'message': str(err)})
             }
         except Exception as e:
             logging.info(f'event = {event}')

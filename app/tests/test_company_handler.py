@@ -1,5 +1,6 @@
+import unittest
 from unittest import TestCase
-from mock import patch, Mock
+from mock import patch
 
 from exception_handler import AssemblyPaymentError
 from service import CompanyService
@@ -9,7 +10,7 @@ import pathlib
 import json
 
 
-class TestUserHandlerFunction(TestCase):
+class TestCompanyHandlerFunction(TestCase):
 
     @patch.object(CompanyService, 'add_company')
     def test_create_company_succeed(self, fake_add_company):
@@ -28,13 +29,13 @@ class TestUserHandlerFunction(TestCase):
 
     @patch.object(CompanyService, 'add_company')
     def test_create_company_failed(self, fake_add_company):
-        fake_add_company.side_effect = AssemblyPaymentError(Mock("Error"), 401, 'Bad credentials')
+        fake_add_company.side_effect = AssemblyPaymentError(AssemblyPaymentError.SYSTEM_ERROR, 500, 'Bad credentials')
         with open(f'{pathlib.Path(__file__).parent}/resources/create_company_input.json') as f:
             event = json.loads(f.read())
             response = create_company(event=event, context='')
 
-        self.assertEqual(response['statusCode'], 401)
-        self.assertEqual(json.loads(response['body'])['message'], 'Something went wrong in the payment gateway')
+        self.assertEqual(response['statusCode'], 500)
+        self.assertEqual(json.loads(response['body'])['message'], AssemblyPaymentError.SYSTEM_ERROR)
         fake_add_company.assert_called_with(
             body={'user_id': '18d0de88-a44c-458a-bfb0-3c85aa3ab956', 'business_name': 'ABC Company',
                   'tax_number': '12345', 'address_line1': '100 Collins Street', 'country': 'AUS', 'suburb': 'Docklands',
@@ -107,3 +108,16 @@ class TestUserHandlerFunction(TestCase):
         self.assertEqual(len(json.loads(response['body'])), 2)
         self.assertEqual(response['statusCode'], 200)
         fake_get_companies.assert_called_with()
+
+    @patch.object(CompanyService, 'get_companies')
+    def test_get_companies_failed_with_resource_not_found_error(self, fake_get_companies):
+        fake_get_companies.side_effect = ResourceNotFoundError('Can not found any companies in the system', 404)
+        response = get_companies('', '')
+
+        self.assertEqual(json.loads(response['body'])['message'], 'Can not found any companies in the system')
+        self.assertEqual(response['statusCode'], 404)
+        fake_get_companies.assert_called_with()
+
+
+if __name__ == '__main__':
+    unittest.main()

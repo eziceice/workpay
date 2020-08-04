@@ -7,3 +7,4 @@ class LambdaFunction(Enum):
     GET_COMPANY = 'get-company'
     GET_COMPANIES = 'get-companies'
     CREATE_QUOTE = 'create-quote'
+    GET_USERS = 'get-users'

@@ -21,6 +21,9 @@ class APIGatewayStack(core.Stack):
                                                                         metrics_enabled=True,
                                                                         tracing_enabled=True, stage_name=props.env))
         v1_resource = self.create_api_v1_resource()
+        self.params_validator = apigw.RequestValidator(self, id='APIParamsValidator',
+                                                       request_validator_name='ParamsValidator',
+                                                       rest_api=self.rest_api, validate_request_parameters=True)
         self.create_api_v1_user_resource(v1_resource, functions)
         self.create_api_v1_company_resource(v1_resource, functions)
         self.create_api_v1_quote_resource(v1_resource, functions)
@@ -35,6 +38,11 @@ class APIGatewayStack(core.Stack):
         # Create User
         apigw.Method(self, id='CreateUserMethod', http_method='POST', resource=user_resource,
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_USER], proxy=True))
+
+        apigw.Method(self, id='GetUsersMethod', http_method='GET', resource=user_resource,
+                     integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_USERS], proxy=True),
+                     options=apigw.MethodOptions(request_parameters={'method.request.querystring.type': True},
+                                                 request_validator=self.params_validator))
 
     def create_api_v1_company_resource(self, parent_resource, functions):
         company_resource = apigw.Resource(self, id='APIv1CompanyResource', path_part='companies',

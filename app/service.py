@@ -1,5 +1,8 @@
 import logging
 from datetime import date
+
+from boto3.dynamodb.conditions import Attr
+
 from db import DynamoDB
 from typing import (
     Dict,
@@ -28,6 +31,13 @@ class UserService:
         gw_user_item = self.build_payment_gw_item(user_id, body)
         self.payment_gw.add_user(gw_user_item, endpoint='users')
         self.dynamodb.add_item(table_name=self.table_name, item=db_user_item)
+
+    def get_users(self, user_type):
+        user_filter = Attr('type').eq(user_type)
+        result = self.dynamodb.get_items(self.table_name, item_filter=user_filter)
+        if len(result) == 0:
+            raise ResourceNotFoundError(f'Can not found any {user_type} in the system', 404)
+        return result
 
     @classmethod
     def build_db_item(cls, user_id, body):
@@ -59,6 +69,7 @@ class CompanyService:
         self.dynamodb = DynamoDB()
         self.payment_gw = AssemblyPaymentService()
         self.table_name = f'{properties.org}-{properties.env}-company-table'
+        self.user_table_name = f'{properties.org}-{properties.env}-user-table'
 
     def add_company(self, body: Dict[str, Any]):
         company_id = ''
@@ -67,6 +78,7 @@ class CompanyService:
         company_id = self.payment_gw.add_company(gw_company_item, endpoint='companies')
         db_company_item['id'] = company_id
         self.dynamodb.add_item(table_name=self.table_name, item=db_company_item)
+        self.dynamodb.update_item(table_name=self.user_table_name, key=body['user_id'], attribute_value=company_id, attribute_name='company_id')
         return company_id
 
     def get_companies(self) -> List[Dict[str, Any]]:

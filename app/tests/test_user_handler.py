@@ -41,7 +41,7 @@ def mock_users_data(client, table_name):
             'email': {'S': 'MJ@125.com'},
             'mobile': {'S': f'0444004{x}'},
             'country': {'S': 'AUS'},
-            'type': {'S': 'Seller'}
+            'type': {'S': 'SELLER'}
         })
 
 
@@ -52,7 +52,7 @@ class TestUserHandlerFunction(TestCase):
         self.table_name = f'{properties.org}-{properties.env}-user-table'
 
     @patch.object(UserService, 'add_user')
-    def test_create_user_succeed(self, fake_add_user):
+    def test_create_seller_succeed(self, fake_add_user):
         # with patch.object(UserService, 'add_user') as mock_method:
         #     mock_method.return_value = None
         fake_add_user.return_value = None
@@ -68,7 +68,7 @@ class TestUserHandlerFunction(TestCase):
                                                'type': 'seller'})
 
     @patch.object(UserService, 'add_user')
-    def test_create_user_failed(self, fake_add_user):
+    def test_create_seller_failed(self, fake_add_user):
         fake_add_user.side_effect = KeyError(Mock(status=400), 'user_id is missing!')
         with open(f'{pathlib.Path(__file__).parent}/resources/create_user_input.json') as f:
             data = json.loads(f.read())
@@ -82,7 +82,7 @@ class TestUserHandlerFunction(TestCase):
 
     # For integration test
     # @mock_dynamodb2
-    # def test_create_user_succeed(self):
+    # def test_create_seller_succeed(self):
     #     mock_client = mock_dynamodb_client(
     #         table_name=self.table_name, key='id')
     #     with open(f'{pathlib.Path(__file__).parent}/resources/create_user_input.json') as f:

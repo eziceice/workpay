@@ -37,6 +37,17 @@ class LambdaStack(core.Stack):
             role=lambda_full_access_role
         )
 
+        self.get_users_function = _lambda.Function(
+            self, id='GetUsersFunction',
+            function_name=f'{props.org}-{props.env}-get-users-function',
+            runtime=_lambda.Runtime.PYTHON_3_8,
+            timeout=core.Duration.seconds(10),
+            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
+                                          key=props.lambda_version),
+            handler='user_handler.get_users',
+            role=lambda_full_access_role
+        )
+
         self.create_company_function = _lambda.Function(
             self, id='CreateCompanyFunction',
             function_name=f'{props.org}-{props.env}-create-company-function',
@@ -89,4 +100,5 @@ class LambdaStack(core.Stack):
             LambdaFunction.GET_COMPANIES: self.get_companies_function,
             LambdaFunction.GET_COMPANY: self.get_company_function,
             LambdaFunction.CREATE_QUOTE: self.create_quote_function,
+            LambdaFunction.GET_USERS: self.get_users_function
         }

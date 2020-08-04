@@ -24,3 +24,11 @@ class DynamoDB:
     def get_item(self, table_name: str, key: str, item_id: str):
         table = self.dynamodb.Table(table_name)
         return table.query(KeyConditionExpression=Key(key).eq(item_id))['Items']
+
+    def update_item(self, table_name: str, key: str, attribute_value: str, attribute_name: str):
+        table = self.dynamodb.Table(table_name)
+        return table.update_item(
+            Key={'id': key},
+            UpdateExpression=f'set {attribute_name} = :{attribute_name}',
+            ExpressionAttributeValues={f':{attribute_name}': attribute_value}
+        )

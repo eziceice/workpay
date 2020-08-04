@@ -17,3 +17,17 @@ def create_user(event, context):
         },
         'body': json.dumps(response)
     }
+
+
+@exception_handler_on_error
+def get_users(event, context):
+    user_type = event['queryStringParameters']['type'].upper()
+    user_service = UserService()
+    response = user_service.get_users(user_type=user_type)
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps(response)
+    }

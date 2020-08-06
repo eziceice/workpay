@@ -8,3 +8,4 @@ class LambdaFunction(Enum):
     GET_COMPANIES = 'get-companies'
     CREATE_QUOTE = 'create-quote'
     GET_USERS = 'get-users'
+    SEND_SMS = 'send-sms'

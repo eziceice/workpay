@@ -27,6 +27,7 @@ class APIGatewayStack(core.Stack):
         self.create_api_v1_user_resource(v1_resource, functions)
         self.create_api_v1_company_resource(v1_resource, functions)
         self.create_api_v1_quote_resource(v1_resource, functions)
+        self.create_api_v1_sms_resource(v1_resource, functions)
 
     def create_api_v1_resource(self):
         v1_resource = apigw.Resource(self, id='APIv1Resource', path_part='v1', parent=self.rest_api.root)
@@ -39,6 +40,7 @@ class APIGatewayStack(core.Stack):
         apigw.Method(self, id='CreateUserMethod', http_method='POST', resource=user_resource,
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_USER], proxy=True))
 
+        # Get Users
         apigw.Method(self, id='GetUsersMethod', http_method='GET', resource=user_resource,
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.GET_USERS], proxy=True),
                      options=apigw.MethodOptions(request_parameters={'method.request.querystring.type': True},
@@ -68,3 +70,10 @@ class APIGatewayStack(core.Stack):
         # Create Quote
         apigw.Method(self, id='CreateQuoteMethod', http_method='POST', resource=quote_resource,
                      integration=apigw.LambdaIntegration(functions[LambdaFunction.CREATE_QUOTE], proxy=True))
+
+    def create_api_v1_sms_resource(self, parent_resource, functions):
+        sms_resource = apigw.Resource(self, id='APIv1SMSeResource', path_part='sms', parent=parent_resource)
+
+        # Send SMS
+        apigw.Method(self, id='SendSMSMethod', http_method='POST', resource=sms_resource,
+                     integration=apigw.LambdaIntegration(functions[LambdaFunction.SEND_SMS], proxy=True))

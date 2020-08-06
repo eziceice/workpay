@@ -1,6 +1,7 @@
 import logging
 from datetime import date
 
+import boto3
 from boto3.dynamodb.conditions import Attr
 
 from db import DynamoDB
@@ -78,7 +79,8 @@ class CompanyService:
         company_id = self.payment_gw.add_company(gw_company_item, endpoint='companies')
         db_company_item['id'] = company_id
         self.dynamodb.add_item(table_name=self.table_name, item=db_company_item)
-        self.dynamodb.update_item(table_name=self.user_table_name, key=body['user_id'], attribute_value=company_id, attribute_name='company_id')
+        self.dynamodb.update_item(table_name=self.user_table_name, key=body['user_id'], attribute_value=company_id,
+                                  attribute_name='company_id')
         return company_id
 
     def get_companies(self) -> List[Dict[str, Any]]:
@@ -217,3 +219,32 @@ class AssemblyPaymentService:
             logging.error(
                 f'Assembly Payment internal server error, response code: {status_code}, response content: {content}')
             raise AssemblyPaymentError(AssemblyPaymentError.SYSTEM_ERROR, 500, content)
+
+
+class SMSService:
+    def __init__(self):
+        self.client = boto3.client('pinpoint')
+        self.application_id = 'dc0bd061a34a427c961760a3db8eee32'  # TODO: use env var
+
+    def send_message(self, request_body):
+        destination_number = request_body['destination_number']
+        message_type = 'TRANSACTIONAL'
+        sender_id = 'WorkPay'
+        raw_response = self.client.send_messages(
+            ApplicationId=self.application_id,
+            MessageRequest={
+                'Addresses': {
+                    destination_number: {
+                        'ChannelType': 'SMS'
+                    }
+                },
+                'MessageConfiguration': {
+                    'SMSMessage': {
+                        'Body': request_body['message'],
+                        'MessageType': message_type,
+                        'SenderId': sender_id
+                    }
+                }
+            }
+        )
+        return {'message-id': raw_response['MessageResponse']['Result'][destination_number]['MessageId']}

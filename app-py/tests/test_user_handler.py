@@ -6,10 +6,13 @@ from mock import patch, Mock
 import boto3
 import utils
 from unittest import TestCase
+
+from exception import ResourceNotFoundError
 from service import UserService
 from moto import mock_dynamodb2
 from user_handler import (
-    create_user
+    create_user,
+    get_users
 )
 
 
@@ -52,7 +55,7 @@ class TestUserHandlerFunction(TestCase):
         self.table_name = f'{properties.org}-{properties.env}-user-table'
 
     @patch.object(UserService, 'add_user')
-    def test_create_seller_succeed(self, fake_add_user):
+    def test_create_user_succeed(self, fake_add_user):
         # with patch.object(UserService, 'add_user') as mock_method:
         #     mock_method.return_value = None
         fake_add_user.return_value = None
@@ -68,7 +71,7 @@ class TestUserHandlerFunction(TestCase):
                                                'type': 'seller'})
 
     @patch.object(UserService, 'add_user')
-    def test_create_seller_failed(self, fake_add_user):
+    def test_create_user_failed(self, fake_add_user):
         fake_add_user.side_effect = KeyError(Mock(status=400), 'user_id is missing!')
         with open(f'{pathlib.Path(__file__).parent}/resources/create_user_input.json') as f:
             data = json.loads(f.read())
@@ -79,6 +82,56 @@ class TestUserHandlerFunction(TestCase):
                                          body={'first_name': 'Yutian', 'last_name': 'Li8',
                                                'email': 'liyutian8@gmail.com', 'mobile': '0451777888', 'country': 'AUS',
                                                'type': 'seller'})
+
+    @patch.object(UserService, 'get_users')
+    def test_get_users_succeed(self, fake_get_users):
+        user1 = {
+            "company_id": "7a5c37a0-b382-0138-5877-0a58a9feac03",
+            "country": "AUS",
+            "email": "liyutian11@gmail.com",
+            "first_name": "Yutian2",
+            "id": "1b62e34a-bc7a-4093-876f-004d5dfc011f",
+            "last_name": "Li11",
+            "mobile": "04517778811",
+            "type": "SELLER"
+        }
+        user2 = {
+            "company_id": "7a5c37a0-b382-0138-5877-0a58a9feac03",
+            "country": "AUS",
+            "email": "liyutian11@gmail.com",
+            "first_name": "Yutian3",
+            "id": "1b62e34a-bc7a-4093-876f-004d5dfc011f",
+            "last_name": "Li11",
+            "mobile": "04517778811",
+            "type": "SELLER"
+        }
+        fake_get_users.return_value = [user1, user2]
+        event = {
+            "queryStringParameters":
+                {
+                    "type": "seller"
+                },
+        }
+        response = get_users(event, '')
+
+        self.assertEqual(len(json.loads(response['body'])), 2)
+        self.assertEqual(response['statusCode'], 200)
+        fake_get_users.assert_called_with(user_type="SELLER")
+
+    @patch.object(UserService, 'get_users')
+    def test_get_users_failed_with_resource_not_found_error(self, fake_get_users):
+        fake_get_users.side_effect = ResourceNotFoundError('Can not found any users in the system', 404)
+        event = {
+            "queryStringParameters":
+                {
+                    "type": "seller"
+                },
+        }
+        response = get_users(event, '')
+
+        self.assertEqual(json.loads(response['body'])['message'], 'Can not found any users in the system')
+        self.assertEqual(response['statusCode'], 404)
+        fake_get_users.assert_called_with(user_type="SELLER")
 
     # For integration test
     # @mock_dynamodb2

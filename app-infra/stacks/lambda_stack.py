@@ -22,17 +22,19 @@ class LambdaStack(core.Stack):
                                                'lambda.amazonaws.com', region=props.aws_region),
                                            managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name(
                                                'AWSLambdaFullAccess')])
+        iam.Policy(self, id='SendSMSPolicy', policy_name='LambdaSendSMSPolicy', roles=[lambda_full_access_role],
+                   statements=[iam.PolicyStatement(actions=['mobiletargeting:SendMessages'], resources=['*'])])
 
-        lambda_bucket = s3.Bucket.from_bucket_name(self, id='LambdaResourcesBucket',
-                                                   bucket_name=f'{props.org}-{props.env}-lambda-resources')
+        lambda_python_bucket = s3.Bucket.from_bucket_name(self, id='LambdaPythonResourcesBucket',
+                                                          bucket_name=f'{props.org}-python-lambda-resources')
 
         self.create_user_function = _lambda.Function(
             self, id='CreateUserFunction',
             function_name=f'{props.org}-{props.env}-create-user-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
             handler='user_handler.create_user',
             role=lambda_full_access_role
         )
@@ -42,8 +44,8 @@ class LambdaStack(core.Stack):
             function_name=f'{props.org}-{props.env}-get-users-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
             handler='user_handler.get_users',
             role=lambda_full_access_role
         )
@@ -53,9 +55,9 @@ class LambdaStack(core.Stack):
             function_name=f'{props.org}-{props.env}-create-company-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
-            handler='company_handler.create_company',
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
+            handler='company_handler.send_sms',
             role=lambda_full_access_role
         )
 
@@ -64,8 +66,8 @@ class LambdaStack(core.Stack):
             function_name=f'{props.org}-{props.env}-get-companies-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
             handler='company_handler.get_companies',
             role=lambda_full_access_role
         )
@@ -75,8 +77,8 @@ class LambdaStack(core.Stack):
             function_name=f'{props.org}-{props.env}-get-company-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
             handler='company_handler.get_company',
             role=lambda_full_access_role
         )
@@ -86,9 +88,20 @@ class LambdaStack(core.Stack):
             function_name=f'{props.org}-{props.env}-create-quote-function',
             runtime=_lambda.Runtime.PYTHON_3_8,
             timeout=core.Duration.seconds(10),
-            code=_lambda.Code.from_bucket(bucket=lambda_bucket,
-                                          key=props.lambda_version),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
             handler='quote_handler.create_quote',
+            role=lambda_full_access_role
+        )
+
+        self.send_sms_function = _lambda.Function(
+            self, id='SendSMSFunction',
+            function_name=f'{props.org}-{props.env}-send-sms-function',
+            runtime=_lambda.Runtime.PYTHON_3_8,
+            timeout=core.Duration.seconds(10),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
+            handler='sms_handler.send_sms',
             role=lambda_full_access_role
         )
 
@@ -100,5 +113,6 @@ class LambdaStack(core.Stack):
             LambdaFunction.GET_COMPANIES: self.get_companies_function,
             LambdaFunction.GET_COMPANY: self.get_company_function,
             LambdaFunction.CREATE_QUOTE: self.create_quote_function,
-            LambdaFunction.GET_USERS: self.get_users_function
+            LambdaFunction.GET_USERS: self.get_users_function,
+            LambdaFunction.SEND_SMS: self.send_sms_function
         }

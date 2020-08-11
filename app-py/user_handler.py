@@ -21,8 +21,12 @@ def create_user(event, context):
 
 @exception_handler_on_error
 def get_users(event, context):
-    user_type = event['queryStringParameters'].get('type')
-    user_email = event['queryStringParameters'].get('email')
+    try:
+        user_type = event['queryStringParameters'].get('type')
+        user_email = event['queryStringParameters'].get('email')
+    except AttributeError as e:
+        user_type = None
+        user_email = None
     user_service = UserService()
     if user_type is not None:
         response = user_service.get_users(query_name='type', query_value=user_type.upper())

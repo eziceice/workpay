@@ -4,7 +4,7 @@ import logging
 
 from botocore.exceptions import ClientError
 
-from exception import AssemblyPaymentError, ResourceNotFoundError
+from support.exception import AssemblyPaymentError, ResourceNotFoundError
 
 
 def exception_handler_on_error(handler):

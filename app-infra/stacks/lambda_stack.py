@@ -28,6 +28,9 @@ class LambdaStack(core.Stack):
         lambda_python_bucket = s3.Bucket.from_bucket_name(self, id='LambdaPythonResourcesBucket',
                                                           bucket_name=f'{props.org}-python-lambda-resources')
 
+        lambda_js_bucket = s3.Bucket.from_bucket_name(self, id='LambdaJSResourcesBucket',
+                                                      bucket_name=f'{props.org}-js-lambda-resources')
+
         self.create_user_function = _lambda.Function(
             self, id='CreateUserFunction',
             function_name=f'{props.org}-{props.env}-create-user-function',
@@ -57,7 +60,7 @@ class LambdaStack(core.Stack):
             timeout=core.Duration.seconds(10),
             code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
                                           key=props.lambda_python_version),
-            handler='company_handler.send_sms',
+            handler='company_handler.create_company',
             role=lambda_full_access_role
         )
 
@@ -105,6 +108,28 @@ class LambdaStack(core.Stack):
             role=lambda_full_access_role
         )
 
+        self.create_subby_function = _lambda.Function(
+            self, id='CreateSubbyFunction',
+            function_name=f'{props.org}-{props.env}-create-subby-function',
+            runtime=_lambda.Runtime.PYTHON_3_8,
+            timeout=core.Duration.seconds(10),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
+            handler='subby_handler.create_subby',
+            role=lambda_full_access_role
+        )
+
+        self.update_user_function = _lambda.Function(
+            self, id='UpdateUserFunction',
+            function_name=f'{props.org}-{props.env}-update-user-function',
+            runtime=_lambda.Runtime.PYTHON_3_8,
+            timeout=core.Duration.seconds(10),
+            code=_lambda.Code.from_bucket(bucket=lambda_python_bucket,
+                                          key=props.lambda_python_version),
+            handler='user_handler.update_user',
+            role=lambda_full_access_role
+        )
+
     @property
     def functions(self) -> Dict[LambdaFunction, _lambda.Function]:
         return {
@@ -114,5 +139,7 @@ class LambdaStack(core.Stack):
             LambdaFunction.GET_COMPANY: self.get_company_function,
             LambdaFunction.CREATE_QUOTE: self.create_quote_function,
             LambdaFunction.GET_USERS: self.get_users_function,
-            LambdaFunction.SEND_SMS: self.send_sms_function
+            LambdaFunction.SEND_SMS: self.send_sms_function,
+            LambdaFunction.CREATE_SUBBY: self.create_subby_function,
+            LambdaFunction.UPDATE_USER: self.update_user_function
         }

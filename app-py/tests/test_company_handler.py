@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import patch
 
 from exception_handler import AssemblyPaymentError
-from service import CompanyService
+from support.service import CompanyService
 from company_handler import create_company, get_company, get_companies
 from exception_handler import ResourceNotFoundError
 import pathlib

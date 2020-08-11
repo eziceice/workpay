@@ -1,6 +1,6 @@
 import json
 from exception_handler import exception_handler_on_error
-from service import SMSService
+from support.service import SMSService
 
 
 @exception_handler_on_error

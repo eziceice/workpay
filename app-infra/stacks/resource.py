@@ -9,3 +9,5 @@ class LambdaFunction(Enum):
     CREATE_QUOTE = 'create-quote'
     GET_USERS = 'get-users'
     SEND_SMS = 'send-sms'
+    CREATE_SUBBY = 'create-subby'
+    UPDATE_USER = 'update-user'

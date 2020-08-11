@@ -4,12 +4,11 @@ import unittest
 import uuid
 from mock import patch, Mock
 import boto3
-import utils
+from support import utils
 from unittest import TestCase
 
-from exception import ResourceNotFoundError
-from service import UserService
-from moto import mock_dynamodb2
+from support.exception import ResourceNotFoundError
+from support.service import UserService
 from user_handler import (
     create_user,
     get_users

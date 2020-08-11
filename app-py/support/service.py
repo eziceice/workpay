@@ -4,15 +4,15 @@ from datetime import date
 import boto3
 from boto3.dynamodb.conditions import Attr
 
-from db import DynamoDB
+from support.db import DynamoDB
 from typing import (
     Dict,
     Any,
     List
 )
-from utils import AppProperties
+from support.utils import AppProperties
 from requests.auth import HTTPBasicAuth
-from exception import (
+from support.exception import (
     AssemblyPaymentError,
     ResourceNotFoundError,
     AssemblyPaymentAuthError)
@@ -33,11 +33,28 @@ class UserService:
         self.payment_gw.add_user(gw_user_item, endpoint='users')
         self.dynamodb.add_item(table_name=self.table_name, item=db_user_item)
 
-    def get_users(self, user_type):
-        user_filter = Attr('type').eq(user_type)
+    def get_users(self, query_name, query_value, get_all=False):
+        if not get_all:
+            user_filter = Attr(query_name).eq(query_value)
+        else:
+            user_filter = None
         result = self.dynamodb.get_items(self.table_name, item_filter=user_filter)
         if len(result) == 0:
-            raise ResourceNotFoundError(f'Can not found any {user_type} in the system', 404)
+            raise ResourceNotFoundError(f'Can not found any users with {query_name} = {query_value} in the system', 404)
+        return result
+
+    def update_user(self, user_id, body: Dict[str, Any]):
+        bank_account_id = body.get('bank_account_id')
+        credit_card_id = body.get('credit_card_id')
+        result = self.dynamodb.get_item(table_name=self.table_name, key='id', item_id=user_id)
+        if not result:
+            raise ResourceNotFoundError(f'Can not found {user_id} in the system', 404)
+        if bank_account_id is not None:
+            self.dynamodb.update_item(table_name=self.table_name, key=user_id, attribute_name='bank_account_id',
+                                      attribute_value=bank_account_id)
+        if credit_card_id is not None:
+            self.dynamodb.update_item(table_name=self.table_name, key=user_id, attribute_name='credit_card_id',
+                                      attribute_value=credit_card_id)
         return result
 
     @classmethod
@@ -120,37 +137,6 @@ class CompanyService:
             'city': body['suburb'],
             'zip': body['postcode'],
             'country': body['country'].upper(),
-        }
-
-
-class QuoteService:
-    def __init__(self):
-        properties = AppProperties()
-        self.dynamodb = DynamoDB()
-        self.payment_gw = AssemblyPaymentService()
-        self.table_name = f'{properties.org}-{properties.env}-quote-table'
-
-    def add_quote(self, quote_id: str, body: Dict[str, Any]):
-        db_quote_item = self.build_db_item(quote_id, body)
-        self.dynamodb.add_item(table_name=self.table_name, item=db_quote_item)
-
-    def get_quote(self, quote_id: str):
-        result = self.dynamodb.get_item(table_name=self.table_name, key='id', item_id=quote_id)
-        if len(result) == 0:
-            raise ResourceNotFoundError(f'Can not found quote with given id - {quote_id} in the system', 404)
-        return result
-
-    @classmethod
-    def build_db_item(cls, quote_id, body):
-        return {
-            'id': quote_id,
-            'number': body['number'],
-            'name': body['name'],
-            'description': body['description'],
-            'amount': body['amount'],
-            'company_id': body['company_id'],
-            'currency': body['currency'].upper(),
-            'timestamp': date.today().strftime("%d/%m/%Y")
         }
 
 

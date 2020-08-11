@@ -1,5 +1,5 @@
 import json
-from service import CompanyService
+from support.service import CompanyService
 from exception_handler import exception_handler_on_error
 
 

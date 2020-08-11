@@ -1,5 +1,5 @@
 import json
-from service import UserService
+from support.service import UserService
 from exception_handler import exception_handler_on_error
 
 
@@ -21,13 +21,34 @@ def create_user(event, context):
 
 @exception_handler_on_error
 def get_users(event, context):
-    user_type = event['queryStringParameters']['type'].upper()
+    user_type = event['queryStringParameters'].get('type')
+    user_email = event['queryStringParameters'].get('email')
     user_service = UserService()
-    response = user_service.get_users(user_type=user_type)
+    if user_type is not None:
+        response = user_service.get_users(query_name='type', query_value=user_type.upper())
+    elif user_email is not None:
+        response = user_service.get_users(query_name='email', query_value=user_email)
+    else:
+        response = user_service.get_users('', '', get_all=True)
     return {
         'statusCode': 200,
         'headers': {
             'Content-Type': 'application/json'
         },
         'body': json.dumps(response)
+    }
+
+
+@exception_handler_on_error
+def update_user(event, context):
+    user_id = event['pathParameters']['user_id']
+    request_body = json.loads(event['body'])
+    user_service = UserService()
+    user_service.update_user(user_id=user_id, body=request_body)
+    return {
+        'statusCode': 204,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps('')
     }
